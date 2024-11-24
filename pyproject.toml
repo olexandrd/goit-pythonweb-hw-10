@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "goit-pythonweb-hw-08"
+name = "goit-pythonweb-hw-10"
 version = "0.1.0"
 description = ""
 authors = ["Olexandrd "]
@@ -15,6 +15,9 @@ asyncpg = "^0.30.0"
 greenlet = "^3.1.1"
 pydantic-extra-types = "^2.10.0"
 phonenumbers = "^8.13.50"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+libgravatar = "^1.0.4"
 
 
 [build-system]
