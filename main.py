@@ -15,11 +15,20 @@ The application is accessible via the `/api` prefix for all included routers.
 """
 
 from fastapi import FastAPI, Request, status
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from src.api import contacts, utils, birstdays, auth, users
 
 app = FastAPI()
+origins = ["http://localhost:*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.exception_handler(RateLimitExceeded)
