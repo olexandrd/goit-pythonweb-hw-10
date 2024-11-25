@@ -14,11 +14,5 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def me(user: User = Depends(get_current_user)):
     """
     Retrieve the current authenticated user.
-
-    Args:
-        user (User): The current authenticated user, automatically injected by the Depends function.
-
-    Returns:
-        User: The current authenticated user.
     """
     return user

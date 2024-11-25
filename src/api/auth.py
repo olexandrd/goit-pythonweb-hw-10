@@ -41,20 +41,6 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     """
     Registers a new user in the system.
-    This function handles the registration of a new user by checking if the email
-    or username already exists in the database. If either exists, it raises an
-    HTTP 409 Conflict exception. If both are unique, it hashes the user's password
-    and creates a new user record in the database.
-    Args:
-        user_data (UserCreate): The data required to create a new user, including
-            email, username, and password.
-        db (Session, optional): The database session dependency. Defaults to
-            Depends(get_db).
-    Returns:
-        User: The newly created user object.
-    Raises:
-        HTTPException: If a user with the given email or username already exists,
-            an HTTP 409 Conflict exception is raised.
     """
 
     user_service = UserService(db)
@@ -63,14 +49,14 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     if email_user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Користувач з таким email вже існує",
+            detail="User with this email already exists",
         )
 
     username_user = await user_service.get_user_by_username(user_data.username)
     if username_user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Користувач з таким іменем вже існує",
+            detail="User with this username already exists",
         )
     user_data.password = Hash().get_password_hash(user_data.password)
     new_user = await user_service.create_user(user_data)
@@ -84,16 +70,6 @@ async def login_user(
 ):
     """
     Logs in a user by verifying their credentials and generating an access token.
-
-    Args:
-        form_data (OAuth2PasswordRequestForm): The form data containing the username and password.
-        db (Session): The database session dependency.
-
-    Returns:
-        dict: A dictionary containing the access token and token type.
-
-    Raises:
-        HTTPException: If the login credentials are incorrect.
     """
     user_service = UserService(db)
     user = await user_service.get_user_by_username(form_data.username)
