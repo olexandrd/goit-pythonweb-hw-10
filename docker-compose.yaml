@@ -2,9 +2,9 @@ services:
   postgres:
     image: postgres:alpine
     environment:
-      POSTGRES_USER: appuser
-      POSTGRES_PASSWORD: not-a-secret-pass
-      POSTGRES_DB: app
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:

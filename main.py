@@ -14,10 +14,21 @@ Routers included:
 The application is accessible via the `/api` prefix for all included routers.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from starlette.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 from src.api import contacts, utils, birstdays, auth, users
 
 app = FastAPI()
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        content={"error": "Limit exceeded, too many requests"},
+    )
+
 
 app.include_router(utils.router, prefix="/api")
 app.include_router(contacts.router, prefix="/api")
