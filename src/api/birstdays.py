@@ -19,7 +19,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
-from src.schemas import ContactResponse, User
+from src.schemas import ContactResponse, UserModel
 from src.services.birstdays import BirthdayService
 from src.services.auth import get_current_user
 
@@ -32,7 +32,7 @@ async def read_bistdays(
     limit: int = 100,
     daygap: int = 7,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: UserModel = Depends(get_current_user),
 ):
     """
     Fetch contacts with upcoming birthdays.

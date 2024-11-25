@@ -24,7 +24,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
-from src.schemas import ContactModel, ContactResponse, User
+from src.schemas import ContactModel, ContactResponse, UserModel
 from src.services.contacts import ContactService
 from src.services.auth import get_current_user
 
@@ -37,7 +37,7 @@ async def read_contacts(
     limit: int = 100,
     queue: str | None = None,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: UserModel = Depends(get_current_user),
 ):
     """
     Fetch a list of contacts from the database.
@@ -51,7 +51,7 @@ async def read_contacts(
 async def read_contact(
     contact_id: int,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: UserModel = Depends(get_current_user),
 ):
     """
     Retrieve a contact by its ID.
@@ -70,7 +70,7 @@ async def read_contact(
 async def create_contact(
     body: ContactModel,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: UserModel = Depends(get_current_user),
 ):
     """
     Create a new contact.
@@ -85,7 +85,7 @@ async def update_contact(
     body: ContactModel,
     contact_id: int,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: UserModel = Depends(get_current_user),
 ):
     """
     Update an existing contact.
@@ -103,7 +103,7 @@ async def update_contact(
 async def remove_contact(
     contact_id: int,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: UserModel = Depends(get_current_user),
 ):
     """
     Remove a contact by its ID.

@@ -7,7 +7,7 @@ Classes:
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.repository.bistdays import BirthdayRepository
-from src.schemas import User
+from src.schemas import UserModel
 
 
 class BirthdayService:
@@ -29,7 +29,7 @@ class BirthdayService:
     def __init__(self, db: AsyncSession):
         self.repository = BirthdayRepository(db)
 
-    async def get_contacts(self, skip: int, limit: int, daygap: int, user: User):
+    async def get_contacts(self, skip: int, limit: int, daygap: int, user: UserModel):
         """
         Retrieve a list of contacts based on pagination and day gap criteria.
 

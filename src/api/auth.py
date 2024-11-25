@@ -29,7 +29,7 @@ Functions:
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from src.schemas import UserCreate, Token, User
+from src.schemas import UserCreate, Token, UserModel
 from src.services.auth import create_access_token, Hash
 from src.services.users import UserService
 from src.database.db import get_db
@@ -37,7 +37,7 @@ from src.database.db import get_db
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register", response_model=User, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=UserModel, status_code=status.HTTP_201_CREATED)
 async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     """
     Registers a new user in the system.

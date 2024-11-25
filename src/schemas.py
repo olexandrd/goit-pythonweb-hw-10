@@ -80,7 +80,7 @@ class ContactResponse(ContactModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class User(BaseModel):
+class UserModel(BaseModel):
     """
     User schema model.
 

@@ -25,7 +25,7 @@ Retrieves a contact by its ID for a specific user.
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.repository.contacts import ContactRepository
-from src.schemas import ContactModel, User
+from src.schemas import ContactModel, UserModel
 
 
 class ContactService:
@@ -48,7 +48,7 @@ class ContactService:
     def __init__(self, db: AsyncSession):
         self.repository = ContactRepository(db)
 
-    async def create_contact(self, body: ContactModel, user: User):
+    async def create_contact(self, body: ContactModel, user: UserModel):
         """
         Asynchronously creates a new contact.
 
@@ -61,7 +61,9 @@ class ContactService:
         """
         return await self.repository.create_contact(body, user)
 
-    async def get_contacts(self, skip: int, limit: int, queue: str | None, user: User):
+    async def get_contacts(
+        self, skip: int, limit: int, queue: str | None, user: UserModel
+    ):
         """
         Retrieve a list of contacts with pagination and optional queue filtering.
 
@@ -76,7 +78,7 @@ class ContactService:
         """
         return await self.repository.get_contacts(skip, limit, queue, user)
 
-    async def get_contact(self, contact_id: int, user: User):
+    async def get_contact(self, contact_id: int, user: UserModel):
         """
         Retrieve a contact by its ID for a specific user.
 
@@ -89,7 +91,9 @@ class ContactService:
         """
         return await self.repository.get_contact_by_id(contact_id, user)
 
-    async def update_contact(self, contact_id: int, body: ContactModel, user: User):
+    async def update_contact(
+        self, contact_id: int, body: ContactModel, user: UserModel
+    ):
         """
         Asynchronously updates a contact with the given contact ID.
 
@@ -106,7 +110,7 @@ class ContactService:
         """
         return await self.repository.update_contact(contact_id, body, user)
 
-    async def remove_contact(self, contact_id: int, user: User):
+    async def remove_contact(self, contact_id: int, user: UserModel):
         """
         Asynchronously removes a contact for a given user.
 
