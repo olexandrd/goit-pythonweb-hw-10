@@ -20,6 +20,7 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 libgravatar = "^1.0.4"
 pydantic-settings = "^2.6.1"
 slowapi = "^0.1.9"
+redis = "^5.2.0"
 
 
 [build-system]
