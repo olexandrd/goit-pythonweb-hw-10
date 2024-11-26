@@ -3,7 +3,7 @@ DB operations for bistdays
 """
 
 import json
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 from typing import List
 import redis.asyncio as redis
 
@@ -25,34 +25,25 @@ class BirthdayRepository:
         self.db = session
         self._redis = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT)
 
-    async def serialize_contacts(self, contacts: List[Contact]) -> str:
+    def serialize_contact(self, contact) -> dict:
         """
-        Serialize a list of Contact objects into JSON,
-        handling non-serializable fields like relationships.
+        Serialize a single Contact object into a dictionary, making all fields JSON-compatible.
         """
+        mapper = inspect(contact)
+        serialized = {}
 
-        def serialize(contact):
-            mapper = inspect(contact)
-            serialized = {}
+        for column in mapper.attrs:
+            value = getattr(contact, column.key)
+            if isinstance(value, datetime):
+                serialized[column.key] = value.isoformat()
+            elif isinstance(value, date):
+                serialized[column.key] = value.isoformat()
+            elif isinstance(value, object):
+                serialized[column.key] = str(value)
+            else:
+                serialized[column.key] = value
 
-            for column in mapper.attrs:
-                value = getattr(contact, column.key)
-                if isinstance(value, (int, float, str, bool, type(None))):
-                    serialized[column.key] = value
-                elif isinstance(value, datetime):
-                    serialized[column.key] = value.isoformat()
-                else:
-                    serialized[column.key] = str(value)
-
-            return serialized
-
-        return json.dumps([serialize(contact) for contact in contacts])
-
-    async def deserialize_contacts(self, serialized_contacts: str) -> List[dict]:
-        """
-        Deserialize JSON string into a list of Contact dictionaries.
-        """
-        return json.loads(serialized_contacts)
+        return serialized
 
     async def get_contacts(
         self, skip: int, limit: int, daygap: int, user: User
@@ -66,10 +57,9 @@ class BirthdayRepository:
         end_day = (today + timedelta(days=daygap)).timetuple().tm_yday
         redis_key = f"{user.id}-{skip}-{limit}-{daygap}"
 
-        cached_contacts = await self._redis.get(redis_key)
+        cached_contacts = await self._redis.lrange(redis_key, 0, -1)
         if cached_contacts:
-            # Deserialize and return cached contacts
-            return await self.deserialize_contacts(cached_contacts)
+            return [json.loads(contact.decode("utf-8")) for contact in cached_contacts]
 
         if end_day < start_day:
             stmt = (
@@ -94,9 +84,11 @@ class BirthdayRepository:
         contacts_result = await self.db.execute(stmt)
         contacts = contacts_result.scalars().all()
 
-        # Serialize contacts and store them in Redis
-        serialized_contacts = await self.serialize_contacts(contacts)
-        await self._redis.set(redis_key, list(contacts))
+        for contact in contacts:
+            await self._redis.rpush(
+                redis_key, json.dumps(self.serialize_contact(contact))
+            )
+
         await self._redis.expire(redis_key, 3600)
-        # Return serialized contacts as dictionaries
-        return await self.deserialize_contacts(serialized_contacts)
+
+        return [self.serialize_contact(contact) for contact in contacts]
