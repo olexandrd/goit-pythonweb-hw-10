@@ -47,7 +47,7 @@ And add your own values to the variables:
 2. Run the following commands to set up the project:
 
 ```bash
-docker-compose up -d --build
+docker-compose up --build
 ```
 
 ## Usage
