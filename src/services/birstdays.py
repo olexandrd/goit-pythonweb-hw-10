@@ -30,5 +30,7 @@ class BirthdayService:
         self.repository = BirthdayRepository(db)
 
     async def get_contacts(self, skip: int, limit: int, daygap: int, user: UserModel):
-
+        """
+        Retrieve a list of contacts with upcoming birthdays.
+        """
         return await self.repository.get_contacts(skip, limit, daygap, user)

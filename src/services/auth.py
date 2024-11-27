@@ -1,3 +1,23 @@
+"""
+This module provides authentication services including password hashing, 
+    token generation, and user retrieval.
+
+Classes:
+    Hash: Provides methods to hash and verify passwords using bcrypt.
+
+Functions:
+    create_access_token(data: dict, expires_delta: Optional[int] = None) -> str:
+
+    get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+
+    create_email_token(data: dict) -> str:
+        Creates a confirmation token for the given data with an expiration of 7 days.
+
+    get_email_from_token(token: str) -> str:
+        Retrieves the email from the provided JWT token.
+
+"""
+
 from typing import Optional
 from datetime import datetime, timedelta, UTC
 from fastapi import Depends, HTTPException, status
@@ -122,6 +142,14 @@ async def get_current_user(
 
 
 def create_email_token(data: dict):
+    """
+    Create a configmation token for the given data with an expiration of 7 days.
+    Args:
+        data (dict): The data to encode in the token.
+    Returns:
+        str: The encoded JWT token.
+    """
+
     to_encode = data.copy()
     expire = datetime.now(UTC) + timedelta(days=7)
     to_encode.update({"iat": datetime.now(UTC), "exp": expire})
@@ -130,6 +158,9 @@ def create_email_token(data: dict):
 
 
 async def get_email_from_token(token: str):
+    """
+    Retrieve the email from the provided JWT token.
+    """
     try:
         payload = jwt.decode(
             token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
@@ -140,4 +171,4 @@ async def get_email_from_token(token: str):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Wrong token",
-        )
+        ) from e

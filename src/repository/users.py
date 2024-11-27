@@ -98,6 +98,32 @@ class UserRepository:
         return user
 
     async def confirmed_email(self, email: str) -> None:
+        """
+        Mark the user's email as confirmed.
+        Args:
+            email (str): The email address of the user to confirm.
+        Returns:
+            None
+        """
+
         user = await self.get_user_by_email(email)
         user.confirmed = True
         await self.db.commit()
+
+    async def update_avatar_url(self, email: str, url: str) -> User:
+        """
+        Updates the avatar URL of a user identified by their email.
+        Args:
+            email (str): The email of the user whose avatar URL is to be updated.
+            url (str): The new avatar URL to be set for the user.
+        Returns:
+            User: The updated user object with the new avatar URL.
+        Raises:
+            ValueError: If the user with the given email does not exist.
+        """
+
+        user = await self.get_user_by_email(email)
+        user.avatar = url
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user

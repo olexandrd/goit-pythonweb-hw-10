@@ -1,8 +1,16 @@
+"""
+Configuration settings for the application
+"""
+
 from pydantic import ConfigDict, EmailStr
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    """
+    Settings class for the application configuration.
+    """
+
     DB_URL: str
     JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"
@@ -21,6 +29,10 @@ class Settings(BaseSettings):
     MAIL_SSL_TLS: bool = True
     USE_CREDENTIALS: bool = True
     VALIDATE_CERTS: bool = True
+
+    CLD_NAME: str
+    CLD_API_KEY: int
+    CLD_API_SECRET: str
 
     model_config = ConfigDict(
         extra="ignore", env_file=".env", env_file_encoding="utf-8", case_sensitive=True

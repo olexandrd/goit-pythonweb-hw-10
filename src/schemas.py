@@ -2,18 +2,21 @@
 This module defines Pydantic models for various schemas used in the application.
 
 Classes:
-    ContactModel (BaseModel): A Pydantic model representing a contact with attributes such 
-        as name, surname, email, phone number, birthday, and notes.
-    ContactUpdate (ContactModel): A subclass of ContactModel that represents an update to a contact,
-        with an additional attribute 'done'.
-    ContactResponse (ContactModel): A data model that extends ContactModel and represents the 
-        response schema for a contact, with an additional attribute 'id'.
-    User (BaseModel): A Pydantic model representing a user with attributes such as id, 
-        username, email, and avatar.
-    UserCreate (BaseModel): A schema for creating a new user with attributes such 
-        as username, email, and password.
-    Token (BaseModel): A schema for authentication with attributes such as 
-        access token and token type.
+    ContactModel (BaseModel): Represents a contact with attributes such as 
+        name, surname, email, phone number, birthday, and notes.
+    ContactUpdate (ContactModel): Represents an update to a contact, 
+        including a 'done' attribute.
+    ContactResponse (ContactModel): Represents the response schema for a 
+        contact, extending ContactModel with an 'id' attribute.
+    UserModel (BaseModel): Represents a user with attributes such 
+        as id, username, email, and avatar.
+    UserCreate (BaseModel): Represents the schema for creating a new 
+        user with attributes such as username, email, and password.
+    Token (BaseModel): Represents the schema for authentication tokens 
+        with attributes such as access_token and token_type.
+    RequestEmail (BaseModel): Represents a schema for requesting 
+        an email with an 'email' attribute.
+
 
 """
 
@@ -131,4 +134,8 @@ class Token(BaseModel):
 
 
 class RequestEmail(BaseModel):
+    """
+    RequestEmail schema for requesting an email.
+    """
+
     email: EmailStr

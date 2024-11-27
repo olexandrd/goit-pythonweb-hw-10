@@ -1,3 +1,7 @@
+"""
+Email sender module to send emails to users.
+"""
+
 from pathlib import Path
 
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
@@ -23,6 +27,9 @@ conf = ConnectionConfig(
 
 
 async def send_email(email: EmailStr, username: str, host: str):
+    """
+    Send an email using the FastMail service.
+    """
     try:
         token_verification = create_email_token({"sub": email})
         message = MessageSchema(

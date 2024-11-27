@@ -81,6 +81,9 @@ async def login_user(
 
 @router.get("/confirmed_email/{token}")
 async def confirmed_email(token: str, db: Session = Depends(get_db)):
+    """
+    Confirmed email
+    """
     email = await get_email_from_token(token)
     user_service = UserService(db)
     user = await user_service.get_user_by_email(email)
@@ -91,7 +94,7 @@ async def confirmed_email(token: str, db: Session = Depends(get_db)):
     if user.confirmed:
         return {"message": "Email already confirmed"}
     await user_service.confirmed_email(email)
-    return {"message": "ЕEmail confirmed"}
+    return {"message": "Еmail confirmed"}
 
 
 @router.post("/request_email")
@@ -101,6 +104,9 @@ async def request_email(
     request: Request,
     db: Session = Depends(get_db),
 ):
+    """
+    Request email confirmation
+    """
     user_service = UserService(db)
     user = await user_service.get_user_by_email(body.email)
 
