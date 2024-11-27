@@ -32,7 +32,18 @@ app.add_middleware(
 
 
 @app.exception_handler(RateLimitExceeded)
-async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+async def rate_limit_handler(
+    request: Request, exc: RateLimitExceeded
+):  # pylint: disable=W0613
+    """
+    Handles rate limit exceeded exceptions.
+    Args:
+        request (Request): The incoming HTTP request.
+        exc (RateLimitExceeded): The exception raised when the rate limit is exceeded.
+    Returns:
+        JSONResponse: A JSON response with a 429 status code and an error message
+            indicating that the rate limit has been exceeded.
+    """
     return JSONResponse(
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         content={"error": "Limit exceeded, too many requests"},

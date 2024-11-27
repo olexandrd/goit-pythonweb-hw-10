@@ -14,4 +14,4 @@ RUN apk add --no-cache --virtual .build-deps \
 
 COPY . /app
 
-CMD ["fastapi", "dev", "--host", "0.0.0.0"]
+CMD alembic upgrade head && fastapi run --host 0.0.0.0
