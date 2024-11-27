@@ -15,8 +15,7 @@ from datetime import date
 from sqlalchemy import Integer, String, func, Column
 from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase, relationship
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import Date
-from sqlalchemy.sql.sqltypes import DateTime
+from sqlalchemy.sql.sqltypes import Date, DateTime, Boolean
 
 
 class Base(DeclarativeBase):  # pylint: disable=[missing-class-docstring]
@@ -75,3 +74,4 @@ class User(Base):
     hashed_password = Column(String)
     created_at = Column(DateTime, default=func.now())  # pylint: disable=not-callable
     avatar = Column(String(255), nullable=True)
+    confirmed = Column(Boolean, default=False)

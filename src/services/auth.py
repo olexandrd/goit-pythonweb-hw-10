@@ -1,19 +1,3 @@
-"""
-This module provides authentication services including password hashing, 
-    JWT token creation, and user retrieval.
-
-Classes:
-    Hash: Provides methods to hash and verify passwords using bcrypt.
-
-Functions:
-    create_access_token(data: dict, expires_delta: Optional[int] = None) -> str:
-
-    get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-        Retrieves the current user based on the provided JWT token.
-
-    oauth2_scheme (OAuth2PasswordBearer): OAuth2 password bearer token URL for authentication.
-"""
-
 from typing import Optional
 from datetime import datetime, timedelta, UTC
 from fastapi import Depends, HTTPException, status
@@ -135,3 +119,25 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+
+def create_email_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.now(UTC) + timedelta(days=7)
+    to_encode.update({"iat": datetime.now(UTC), "exp": expire})
+    token = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
+    return token
+
+
+async def get_email_from_token(token: str):
+    try:
+        payload = jwt.decode(
+            token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
+        )
+        email = payload["sub"]
+        return email
+    except JWTError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Wrong token",
+        )

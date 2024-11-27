@@ -4,41 +4,27 @@ This module provides authentication-related endpoints for user registration and 
 Endpoints:
 - POST /auth/register: Registers a new user in the system.
 - POST /auth/login: Authenticates a user and returns an access token.
-
-Functions:
-- register_user(user_data: UserCreate, db: Session = Depends(get_db)) -> User:
-    Registers a new user by checking if the email or username already exists.
-    If either exists, raises an HTTP 409 Conflict exception.
-    If both are unique, hashes the user's password and creates a new user record in the database.
-        user_data (UserCreate): The data required to create a new user, 
-            including email, username, and password.
-        db (Session, optional): The database session dependency. Defaults to Depends(get_db).
-        HTTPException: If a user with the given email or username already exists, 
-            raises an HTTP 409 Conflict exception.
-
-- login_user(form_data: OAuth2PasswordRequestForm = Depends(), 
-    db: Session = Depends(get_db)) -> Token:
-    Authenticates a user by verifying the username and password.
-    If authentication is successful, returns an access token.
-        form_data (OAuth2PasswordRequestForm): The form data containing the username and password.
-        db (Session, optional): The database session dependency. Defaults to Depends(get_db).
-        Token: The access token and token type.
-        HTTPException: If authentication fails, raises an HTTP 401 Unauthorized exception.
 """
 
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request
 from fastapi.security import OAuth2PasswordRequestForm
-from src.schemas import UserCreate, Token, UserModel
-from src.services.auth import create_access_token, Hash
+from src.schemas import UserCreate, Token, UserModel, RequestEmail
+from src.services.auth import create_access_token, Hash, get_email_from_token
 from src.services.users import UserService
 from src.database.db import get_db
+from src.services.email import send_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=UserModel, status_code=status.HTTP_201_CREATED)
-async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
+async def register_user(
+    user_data: UserCreate,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    db: Session = Depends(get_db),
+):
     """
     Registers a new user in the system.
     """
@@ -61,6 +47,10 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     user_data.password = Hash().get_password_hash(user_data.password)
     new_user = await user_service.create_user(user_data)
 
+    background_tasks.add_task(
+        send_email, new_user.email, new_user.username, request.base_url
+    )
+
     return new_user
 
 
@@ -79,6 +69,45 @@ async def login_user(
             detail="Wrong credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    if not user.confirmed:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email not confirmed",
+        )
 
     access_token = await create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/confirmed_email/{token}")
+async def confirmed_email(token: str, db: Session = Depends(get_db)):
+    email = await get_email_from_token(token)
+    user_service = UserService(db)
+    user = await user_service.get_user_by_email(email)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Verification error"
+        )
+    if user.confirmed:
+        return {"message": "Email already confirmed"}
+    await user_service.confirmed_email(email)
+    return {"message": "ЕEmail confirmed"}
+
+
+@router.post("/request_email")
+async def request_email(
+    body: RequestEmail,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    user_service = UserService(db)
+    user = await user_service.get_user_by_email(body.email)
+
+    if user.confirmed:
+        return {"message": "Email already confirmed"}
+    if user:
+        background_tasks.add_task(
+            send_email, user.email, user.username, request.base_url
+        )
+    return {"message": "Check your email for the confirmation link"}
